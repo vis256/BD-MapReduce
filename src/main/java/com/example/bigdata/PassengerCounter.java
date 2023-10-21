@@ -15,6 +15,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class PassengerCounter extends Configured implements Tool {
 
@@ -54,31 +55,18 @@ public class PassengerCounter extends Configured implements Tool {
         }
     }
 
-    public static class PassengerReducer extends Reducer<Text, IntWritable, Text, DoubleWritable> {
-
-        private final DoubleWritable resultValue = new DoubleWritable();
-        Float average;
-        Float count;
-        int sum;
-
+    public static class PassengerReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        int counter;
         @Override
         public void reduce(Text key, Iterable<IntWritable> values,
                            Context context) throws IOException, InterruptedException {
-            average = 0f;
-            count = 0f;
-            sum = 0;
-
-            Text resultKey = new Text("average station size in " + key + " was: ");
+            counter = 0;
 
             for (IntWritable val : values) {
-                sum += val.get();
-                count += 1;
+                counter += val.get();
             }
-            //TODO: set average variable properly
 
-            resultValue.set(average);
-            //TODO: write result pair to the context
-
+            context.write(key, new IntWritable( counter ));
         }
     }
 }
