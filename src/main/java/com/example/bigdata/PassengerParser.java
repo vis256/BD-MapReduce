@@ -8,6 +8,7 @@ import java.util.Scanner;
 
 public class PassengerParser {
     public static void main(String[] args) throws Exception {
+        // This is for local testing
         File file = new File("./data-part.csv");
         Scanner rd = new Scanner(file);
 

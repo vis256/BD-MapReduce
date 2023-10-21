@@ -1,4 +1,5 @@
 package com.example.bigdata;
+import javafx.util.Pair;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -37,28 +38,15 @@ public class PassengerCounter extends Configured implements Tool {
     }
 
     public static class PassengerMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
-
-        private final Text year = new Text();
-        private final IntWritable size = new IntWritable();
-
         public void map(LongWritable offset, Text lineText, Context context) {
             try {
                 if (offset.get() != 0) {
                     String line = lineText.toString();
-                    int i = 0;
-                    /*
-                    2,2018-12-12 15:13:24,2018-12-12 15:50:10,1,5.99,1,N,231,237,1,27,0,0.5,5.56,0,0.3,33.36
-                    [1] - Entering Cab Date
-                    [3] - Passenger Count
-                    [7] - Entering Zone
-                    [9] - Payment Method
-                     */
-                    for (String word : line
-                            .split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
-                        i++;
+                    PassengerData pd = PassengerParser.parseLine(line);
+                    if (pd != null) {
+                        Pair<String, Integer> data = pd.toKeyValue();
+                        context.write(new Text( data.getKey() ), new IntWritable(data.getValue() ));
                     }
-                    //TODO: write intermediate pair to the context
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
